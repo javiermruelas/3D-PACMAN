@@ -1,332 +1,180 @@
 # Low-Poly 3D Pac-Man Game Implementation (React + Three Fiber + Zustand)
 
-This project is a 3D implementation of the classic Pac-Man game using React for the user interface, React Three Fiber for 3D rendering, and Zustand for state management. The game features a low-poly aesthetic.
+This project aims to recreate the classic Pac-Man game in a 3D environment with a distinctive low-poly aesthetic. It leverages the power of React for the user interface, React Three Fiber for seamless 3D rendering within React, and Zustand for robust global state management.
 
-## Key Concepts and Considerations:
+## Core Architecture and Technologies
 
-- **Zustand for Game State:** Zustand is used to manage the global game state (score, lives, level, player position, ghost positions, etc.). This makes it easy to access and update game data from any component.
-- **React Three Fiber for 3D Rendering:** React Three Fiber handles the 3D scene rendering. Components like `<Canvas>`, `<mesh>`, and `<geometry>` are used to create the 3D world.
-- **Component-Based Approach:** The game is broken down into reusable components (Pac-Man, Ghost, Maze, Pellet) for better organization and maintainability.
-- **Maze Generation:** The `generateMazeData()` function in the Zustand store creates the 3D representation of the Pac-Man maze. **You will need to replace the example maze data with your actual maze data.**
-- **Pellet Management:** The `generatePellets` function creates the initial set of pellets. The `eatPellet` function in the Zustand store handles removing pellets when Pac-Man eats them and updating the score.
-- **Ghost AI:** The `Ghost` component includes basic movement, but you will need to implement more sophisticated AI logic for the ghosts' behavior (pathfinding, chasing, etc.).
-- **Pac-Man Movement:** The `movePacman` function in the Zustand store updates Pac-Man's position based on input and handles wall collision detection. A very basic wall collision has been added, and **you will want to improve this.**
-- **Camera Control:** The `useFrame` hook in `GameScene.tsx` can be used to control the camera's position and orientation. A simple camera follow has been added.
-- **Game Loop:** The `useFrame` hook in `GameScene.tsx` runs on every frame and is used for animations, updating game logic, and rendering.
-- **3D Maze Data:** The maze is represented as a 3D array of numbers. For example, `1` represents a wall, and `0` represents an empty space. The 3rd dimension is used to represent the height, but Pacman is a 2D game, so the height is usually `1`.
+This game's foundation rests on the following key technologies and architectural choices:
 
-## Next Steps:
+- **React for UI:** Provides a component-based structure for building the user interface elements of the game (score display, lives, etc.).
+- **React Three Fiber for 3D Rendering:** Acts as the bridge between React and Three.js, enabling the creation and manipulation of 3D scenes and objects using React components (`<Canvas>`, `<mesh>`, `<geometry>`, etc.).
+- **Zustand for Global State Management:** Centralizes the game's dynamic data (score, lives, level, player/ghost positions, etc.), making it easily accessible and modifiable across different components.
 
-- **Implement Maze Data:** Replace the placeholder maze data in `generateMazeData()` with the actual data for your Pac-Man maze. **This is CRUCIAL.**
-- **Flesh Out Ghost AI:** Implement the AI logic for the ghosts in the `Ghost` component and the Zustand store. This is the most complex part of the game.
-- **Complete Pac-Man Movement:** Implement full Pac-Man movement logic, including handling user input (keyboard or gamepad) and preventing movement through walls. Improve wall collision.
-- **Add Collision Detection:** Implement collision detection between Pac-Man and ghosts, Pac-Man and pellets, and Pac-Man and power pellets. Update the score and game state accordingly.
-- **Implement Game Logic:** Implement the core game logic, including scoring, lives, levels, game over conditions, and starting/restarting the game. The Zustand store is the place for this.
-- **Animate with Anime.js:** Use Anime.js to add visual effects, such as Pac-Man's mouth animation, ghost animations, and other visual enhancements.
-- **Sound Effects:** Add sound effects for Pac-Man movement, eating pellets, and other game events.
-- **Polish the UI:** Use Tailwind CSS to style the in-game UI (score, lives, level) and add any other UI elements you need.
+## Key Game Elements and Their Implementation
 
-## 3D Pac-Man Game Implementation Plan (Low-Poly)
+The game world and its inhabitants are structured as reusable components, each with specific responsibilities:
 
-Here's a structured plan to guide your development, broken down into key areas with tasks, assets, and considerations:
+- **Maze (`Maze.tsx`):**
+  - The static environment of the game. Its layout is defined by a 3D array of numbers within the Zustand store.
+  - **Important:** The `generateMazeData()` function in the Zustand store is responsible for creating this 3D representation. **You MUST replace the example maze data with your actual Pac-Man maze data.** The convention is that `1` represents a wall, `0` an empty space, and the third dimension typically has a height of `1` for this 2D gameplay.
+- **Pac-Man (`Pacman.tsx`):**
+  - The player-controlled character. Its movement and state (position, direction, mouth animation) are managed within its component and the Zustand store.
+  - The `movePacman` function in the Zustand store updates Pac-Man's position based on player input and incorporates basic wall collision detection. **This initial collision detection is rudimentary and requires significant improvement.**
+- **Ghost (`Ghost.tsx`):**
+  - The antagonists of the game. Each ghost will have its own component and data within the Zustand store (position, color, AI state).
+  - The component currently includes basic movement. **Implementing sophisticated AI logic (pathfinding, chasing, scatter behavior, etc.) is a crucial next step.**
+- **Pellet (`Pellet.tsx`) and Power Pellet (`PowerPellet.tsx`):**
+  - Collectible items scattered throughout the maze. Their generation and consumption are managed by functions in the Zustand store.
+  - The `generatePellets` function creates the initial pellet layout.
+  - The `eatPellet` function in the Zustand store handles removing eaten pellets, updating the score, and triggering power-up effects for power pellets.
 
-### I. Project Setup and Core Structure
+## Core Game Loop and Dynamics
 
-**Tasks:**
+The game's real-time aspects are handled within the `GameScene.tsx` component:
 
-- **Set up Vite Project:**
-  ```bash
-  npm create vite@latest my-pacman-game -- --template react-ts
-  cd my-pacman-game
-  npm install
-  ```
-- **Install Dependencies:**
-  ```bash
-  npm install three @types/three animejs @react-three/fiber @react-three/drei zustand tailwindcss postcss autoprefixer
-  ```
-- **Create Core Directories and Files:**
-  - Create the directory structure as outlined in your project (e.g., `src/components`, `src/scenes`, `src/store`).
-  - Create the initial files (e.g., `App.tsx`, `GameScene.tsx`, `Pacman.tsx`, `gameStore.ts`).
-- **Configure Tailwind CSS:**
-  - Set up `tailwind.config.js` and `postcss.config.js`.
-- **Initial `App.tsx` and `<Canvas>` Setup:**
-  - Implement the basic `App.tsx` with the `<Canvas>` component from `@react-three/fiber`.
+- **Game Loop (`useFrame`):** This React Three Fiber hook executes on every frame, driving animations, updating game logic (like ghost movement and collision checks), and re-rendering the 3D scene.
+- **Camera Control (`useFrame`):** The camera's position and orientation are managed here, currently implementing a simple follow behavior for Pac-Man.
 
-### II. Maze Design and Implementation
+## State Management (Zustand)
 
-**Tasks:**
+Zustand plays a central role in managing the game's dynamic data:
 
-- **Maze Data Representation:**
-  - Define the 3D array structure for your maze data in `gameStore.ts` (e.g., `number[][][]`, where `1` = wall, `0` = path).
-- **Maze Data Source:**
-  - **Option A: Manual Design:**
-    - Create a 2D representation of your maze in a text file, JSON, or a simple editor.
-    - Write a function to convert this 2D representation into the 3D array format.
-  - **Option B: Procedural Generation (Less Recommended for Pac-Man):**
-    - If you want some procedural elements, research simple maze generation algorithms (e.g., Randomized Depth-First Search, Recursive Backtracking). Adapt the algorithm to your 3D representation. **This is generally not how Pac-Man mazes are made, as they are very specific.**
-- **`Maze.tsx` Component:**
-  - Implement the `Maze.tsx` component to render the maze from the 3D array data.
-  - Use `<mesh>` and `<boxGeometry>` for walls.
-  - Apply a low-poly material (`MeshStandardMaterial` with a flat shading).
+- **Global Game State:** Stores all essential game information, including score, lives, level, player and ghost positions, and the maze and pellet data.
+- **State Update Functions:** Provides functions like `movePacman`, `eatPellet`, and `generateMazeData` to modify the game state in a controlled manner.
 
-**Assets:**
+## Visual Enhancements and User Interface
 
-- Basic Cube (for walls)
+- **Low-Poly Aesthetic:** The game will utilize simple geometries and flat shading to achieve a distinct low-polygon visual style.
+- **Anime.js for Animations:** This library will be used to create visual effects such as Pac-Man's mouth movement and potentially ghost animations.
+- **Tailwind CSS for UI:** Tailwind CSS will style the in-game user interface elements (score, lives, level display).
 
-**Data:**
+## Development Roadmap and Next Steps
 
-- 3D array representation of the maze.
+To guide the development process, here's a structured plan outlining key areas and their respective tasks:
 
-**Considerations:**
+### I. Core Project Setup
 
-- Pac-Man mazes are very specific. Procedural generation is usually not appropriate. Manual design is preferred.
-- Ensure the maze data is easily editable.
-- Plan for the ghost house and how it's represented in the data.
+1.  **Initialize Project:**
+    ```bash
+    npm create vite@latest
+    ```
+    Select `React` and `TypeScript + SWC`.
+2.  **Install Dependencies:**
+    ```bash
+    npm install three @types/three animejs @react-three/fiber @react-three/drei zustand tailwindcss postcss autoprefixer
+    ```
+3.  **Set up ShadCN UI:** Follow the instructions at [[https://ui.shadcn.com/docs/installation/vite](https://ui.shadcn.com/docs/installation/vite)].
+4.  **Create Directory Structure:** Organize your project files into logical directories (e.g., `src/components`, `src/scenes`, `src/store`).
+5.  **Create Initial Files:** Set up essential files like `App.tsx`, `GameScene.tsx`, `Pacman.tsx`, and `gameStore.ts`.
+6.  **Configure Tailwind CSS:** Configure `tailwind.config.js` and `postcss.config.js`.
+7.  **Basic `<Canvas>` Setup:** Implement the initial `App.tsx` with the `<Canvas>` component from `@react-three/fiber` to establish the 3D rendering context.
+
+### II. Maze Implementation
+
+1.  **Define Maze Data Structure:** In `gameStore.ts`, finalize the 3D array structure for representing the maze (e.g., `number[][][]`).
+2.  **Implement Maze Data Source:**
+    - **Crucially:** Design your Pac-Man maze layout (e.g., in a text file or JSON).
+    - Write the `generateMazeData()` function in `gameStore.ts` to convert your maze design into the required 3D array format.
+3.  **Create `Maze.tsx` Component:**
+    - Render the maze walls using `<mesh>` and `<boxGeometry>` based on the `mazeData`.
+    - Apply a `MeshStandardMaterial` with flat shading for the low-poly look.
 
 ### III. Pac-Man Movement and Control
 
-**Tasks:**
-
-- **`Pacman.tsx` Component:**
-  - Create the `Pacman.tsx` component.
-  - Use `<mesh>` and `<sphereGeometry>` (or a slightly modified sphere for a more Pac-Man-like shape).
-  - Apply a yellow, low-poly material.
-- **Zustand State for Pac-Man:**
-  - In `gameStore.ts`, manage Pac-Man's:
-    - Position (`x`, `y`, `z`)
-    - Direction (`x`, `z`)
-    - Mouth animation state (open/closed)
-- **`movePacman()` Function in Zustand:**
-  - Implement the `movePacman()` function in `gameStore.ts`:
-    - Update Pac-Man's position based on direction and speed.
-    - Implement **improved wall collision detection**:
-      - Check the next position for wall collisions before updating Pac-Man's position.
-      - Handle cases where Pac-Man is partially in a wall.
-      - Consider using `Math.floor()` and `Math.ceil()` to check the grid cells around Pac-Man.
-- **Input Handling:**
-  - In `Pacman.tsx` or a separate input handler:
-    - Use `useEffect` to listen for keyboard (or gamepad) input.
-    - Update Pac-Man's direction in the Zustand store based on input.
-- **Mouth Animation:**
-  - Use `useFrame` in `Pacman.tsx` and `animejs` to animate Pac-Man's mouth opening and closing. Control the `morphTargets` of the sphere, or scale it.
-
-**Assets:**
-
-- Low-Poly Sphere (or modified sphere) for Pac-Man
-
-**Data:**
-
-- Pac-Man's position and direction in the Zustand store.
-
-**Algorithms:**
-
-- Improved wall collision detection (grid-based checking).
-
-**Considerations:**
-
-- Smooth movement.
-- Correctly handling turns and wall collisions.
-- Mouth animation synced with movement.
+1.  **Create `Pacman.tsx` Component:**
+    - Render Pac-Man using `<mesh>` and `<sphereGeometry>` (or a slightly modified shape).
+    - Apply a yellow, low-poly material.
+2.  **Manage Pac-Man State in Zustand:**
+    - Store Pac-Man's `position` (x, y, z), `direction` (x, z), and mouth animation state in `gameStore.ts`.
+3.  **Implement `movePacman()` Function:**
+    - Update Pac-Man's position in `gameStore.ts` based on its direction and speed.
+    - **Significantly improve wall collision detection:** Implement robust checks against the maze data before allowing movement, considering Pac-Man's size and potential partial overlaps.
+4.  **Handle User Input:**
+    - In `Pacman.tsx` or a dedicated input handler, listen for keyboard or gamepad input.
+    - Update Pac-Man's `direction` in the Zustand store accordingly.
+5.  **Implement Mouth Animation:**
+    - Use `useFrame` in `Pacman.tsx` and Anime.js to animate Pac-Man's mouth opening and closing, potentially by manipulating `morphTargets` or scaling.
 
 ### IV. Ghost Behavior and AI
 
-**Tasks:**
-
-- **`Ghost.tsx` Component:**
-  - Create the `Ghost.tsx` component.
-  - Use `<mesh>` and `<boxGeometry>` (or a custom low-poly ghost shape).
-  - Apply different colors for each ghost.
-- **Ghost Data in Zustand:**
-  - In `gameStore.ts`, define the data structure for each ghost:
-    - `name`
-    - `color`
-    - `position` (`x`, `y`, `z`)
-    - `direction` (`x`, `z`)
-    - `speed`
-    - `aiState` (e.g., chasing, scatter, frightened)
-- **Ghost AI Logic:**
-  - Implement the ghost AI logic in `gameStore.ts` and update ghost positions in `useFrame` of `GameScene.tsx`:
-    - **Basic Movement:** Random movement with wall avoidance.
-    - **Scatter Mode:** Ghosts move to their designated corners of the maze.
-    - **Chase Mode:** Ghosts target Pac-Man's position (different strategies for each ghost).
-    - **Frightened Mode:** Ghosts move randomly and can be eaten by Pac-Man.
-- **Pathfinding (for Chasing):**
-  - **Option A: Simple Following:** For a very basic game, ghosts can move directly towards Pac-Man, but this gets stuck on walls.
-  - **Option B: Breadth-First Search (BFS):** A good algorithm for finding the shortest path in an unweighted graph (your maze grid).
-  - **Option C: A\* Search (A-Star):** More efficient than BFS if you want to add heuristics (e.g., distance to Pac-Man). A\* is generally preferred for game pathfinding.
-- **Wall Collision:** Implement wall collision for ghosts, similar to Pac-Man.
-  - Implement wall collision detection for ghosts using the same grid-based approach as Pac-Man.
-
-**Assets:**
-
-- Low-Poly Ghost models (can be simple variations of a cube)
-
-**Data:**
-
-- Ghost data in the Zustand store (position, direction, AI state).
-
-**Algorithms:**
-
-- Basic movement with wall avoidance
-- BFS or A\* for pathfinding (recommended for good AI)
-
-**Considerations:**
-
-- Different AI personalities for each ghost.
-- Transitions between AI states (scatter, chase, frightened).
-- Efficient pathfinding.
+1.  **Create `Ghost.tsx` Component:**
+    - Render each ghost using `<mesh>` and a suitable low-poly geometry (e.g., a stylized cube).
+    - Apply distinct colors for each ghost.
+2.  **Manage Ghost State in Zustand:**
+    - Store data for each ghost: `name`, `color`, `position`, `direction`, `speed`, and `aiState` (chasing, scatter, frightened).
+3.  **Implement Ghost AI Logic:**
+    - Within `gameStore.ts` and the `useFrame` in `GameScene.tsx`, implement the different AI behaviors:
+      - **Basic Movement:** Implement random movement with wall avoidance.
+      - **Scatter Mode:** Define target corners for each ghost and implement movement towards them.
+      - **Chase Mode:** Implement pathfinding algorithms (BFS or, ideally, A\*) to navigate the maze towards Pac-Man. Consider different targeting strategies for each ghost.
+      - **Frightened Mode:** Implement random movement and the ability for Pac-Man to eat them.
+4.  **Implement Ghost Wall Collision:** Use a similar grid-based approach as Pac-Man to prevent ghosts from moving through walls.
 
 ### V. Pellet and Power Pellet Management
 
-**Tasks:**
+1.  **Create `Pellet.tsx` and `PowerPellet.tsx`:**
+    - Render pellets and power pellets using `<mesh>` and `<sphereGeometry>`.
+    - Apply distinct materials.
+2.  **Manage Pellet Data in Zustand:**
+    - Store arrays for `pellets` and `powerPellets`, each containing their unique `id` and `position`.
+3.  **Implement `generatePellets()` and `generatePowerPellets()`:**
+    - Populate the `pellets` and `powerPellets` arrays in `gameStore.ts` based on the `mazeData`, ensuring they are placed in empty spaces.
+4.  **Implement `eatPellet()`:**
+    - Remove the eaten pellet from the corresponding array in the Zustand store.
+    - Increment the `score`.
+    - If a power pellet is eaten, change the ghosts' `aiState` to frightened and start a timer.
 
-- **`Pellet.tsx` and `PowerPellet.tsx` Components:**
-  - Create the `Pellet.tsx` and `PowerPellet.tsx` components.
-  - Use `<mesh>` and `<sphereGeometry>` for both.
-  - Apply different materials (white for regular, a distinct color for power).
-- **Pellet Data in Zustand:**
-  - In `gameStore.ts`, store the pellet data:
-    ```typescript
-    pellets: {
-      id: string;
-      position: {
-        x: number;
-        y: number;
-        z: number;
-      }
-    }
-    [];
-    powerPellets: {
-      id: string;
-      position: {
-        x: number;
-        y: number;
-        z: number;
-      }
-    }
-    [];
-    ```
-- **`generatePellets()` and `generatePowerPellets()` Functions:**
-  - Implement these functions in `gameStore.ts` to:
-    - Place pellets in the maze (based on the `mazeData`).
-    - Ensure pellets are not placed on walls.
-- **`eatPellet()` Function in Zustand:**
-  - Implement the `eatPellet()` function in `gameStore.ts`:
-    - Remove the eaten pellet from the `pellets` array.
-    - Update the score.
-- **Power Pellet Effects:**
-  - In `eatPellet()`, add logic for power pellet effects:
-    - Change ghost states to frightened.
-    - Allow Pac-Man to eat ghosts.
-    - Set a timer for the power-up duration.
+### VI. Core Game Logic Implementation
 
-**Assets:**
-
-- Low-Poly Spheres (different colors/sizes)
-
-**Data:**
-
-- Pellet and power pellet arrays in the Zustand store.
-
-**Considerations:**
-
-- Pellet placement based on maze layout.
-- Power pellet effects and duration.
-
-### VI. Game Logic and State Management
-
-**Tasks:**
-
-- **Zustand Store (`gameStore.ts`):**
-  - Manage the following game state in Zustand:
-    - `gameStarted`
-    - `gameOver`
-    - `score`
-    - `lives`
-    - `level`
-    - `gameState` (e.g., playing, paused, gameOver)
-- **`initializeGame()` Function:**
-  - Implement this function in `gameStore.ts` to:
-    - Reset the game state.
-    - Generate the maze.
-    - Place Pac-Man, ghosts, and pellets.
-- **`startGame()` and `restartGame()` Functions:**
-  - Implement these functions in `gameStore.ts` to control the game flow.
-- **Scoring:**
-  - Update the score in `eatPellet()` and `eatGhost()`.
-- **Lives and Game Over:**
-  - Manage Pac-Man's lives.
-  - Determine when the game is over.
-- **Levels:**
-  - Implement level progression (new maze layouts, increased ghost speed, etc.).
-- **Collision Detection:**
-  - Implement collision detection:
-    - Pac-Man and pellets (in `movePacman()` or a separate function).
-    - Pac-Man and ghosts (in `useFrame` of `GameScene.tsx`).
-    - Ghosts and walls (in `useFrame` of `GameScene.tsx`).
-
-**Data:**
-
-- Game state in the Zustand store.
-
-**Considerations:**
-
-- Clear separation of game logic and rendering.
-- Properly updating the game state.
-- Handling game over and level transitions.
+1.  **Manage Game State in Zustand:**
+    - Add state variables for `gameStarted`, `gameOver`, `score`, `lives`, `level`, and `gameState` to `gameStore.ts`.
+2.  **Implement `initializeGame()`:**
+    - Reset game state variables.
+    - Call `generateMazeData()`, `generatePellets()`, and position Pac-Man and the ghosts in their starting locations.
+3.  **Implement `startGame()` and `restartGame()`:**
+    - Control the flow of the game (e.g., setting `gameStarted` to true).
+4.  **Implement Scoring Logic:**
+    - Update the `score` in `eatPellet()` and when Pac-Man eats a frightened ghost.
+5.  **Manage Lives and Game Over:**
+    - Decrement `lives` upon collision with a non-frightened ghost.
+    - Set `gameOver` to true when lives reach zero.
+6.  **Implement Level Progression:**
+    - Define conditions for advancing to the next level (e.g., eating all pellets).
+    - Implement logic to increase the `level`, potentially changing the maze, ghost speed, etc.
+7.  **Implement Collision Detection:**
+    - **Pac-Man and Pellets:** Check for proximity in `movePacman()` or a separate collision detection function.
+    - **Pac-Man and Ghosts:** Check for proximity in the `useFrame` of `GameScene.tsx`, considering the ghosts' `aiState`.
+    - **Ghosts and Walls:** Already addressed in the Ghost AI section.
 
 ### VII. Visual Enhancements and Polish
 
-**Tasks:**
-
-- **Camera Control:**
-  - Use `useFrame` in `GameScene.tsx` to control the camera.
-  - Smoothly follow Pac-Man.
-  - Consider different camera angles.
-- **Animations (Anime.js):**
-  - Use Anime.js for:
-    - Pac-Man's mouth animation.
-    - Ghost animations (e.g., flickering when frightened).
-    - Power pellet pulsing effect.
-    - Transitions.
-- **Lighting and Materials:**
-  - Use Three.js lights (`AmbientLight`, `DirectionalLight`) to illuminate the scene.
-  - Use `MeshStandardMaterial` with appropriate colors and shading (flat shading for low-poly).
-- **UI (Tailwind CSS):**
-  - Style the in-game UI (score, lives, level) using Tailwind CSS.
-  - Create a start screen and game over screen.
-- **Sound Effects:**
-  - (Optional) Add sound effects for:
-    - Pac-Man movement.
-    - Eating pellets.
-    - Eating ghosts.
-    - Game start/end.
-
-**Assets:**
-
-- (Optional) Sound files
-
-**Considerations:**
-
-- Low-poly aesthetic consistency.
-- Smooth animations.
-- Clear and informative UI.
+1.  **Refine Camera Control:**
+    - Smoothly follow Pac-Man's movement using `useFrame`.
+    - Experiment with different camera angles for the best perspective.
+2.  **Implement Animations with Anime.js:**
+    - Animate Pac-Man's mouth opening and closing.
+    - Animate ghosts (e.g., flickering in frightened mode).
+    - Add a pulsing effect to power pellets.
+    - Consider animations for game transitions.
+3.  **Add Lighting and Materials:**
+    - Use `AmbientLight` and potentially `DirectionalLight` to illuminate the scene.
+    - Ensure all objects use `MeshStandardMaterial` with appropriate colors and flat shading.
+4.  **Style UI with Tailwind CSS:**
+    - Create and style the in-game UI (score, lives, level display).
+    - Design and implement start and game over screens.
+5.  **(Optional) Add Sound Effects:** Integrate sound effects for key game events.
 
 ### VIII. Testing and Refinement
 
-**Tasks:**
-
-- **Playtesting:** Thoroughly test the game to identify bugs and areas for improvement.
-- **Debugging:** Use browser developer tools and React DevTools to debug issues.
-- **Performance Optimization:** Optimize the game's performance if needed (e.g., reduce the number of draw calls, optimize Three.js materials).
-- **Code Refactoring:** Refactor your code for better readability and maintainability.
-- **Polishing:** Fine-tune the gameplay, visuals, and UI.
+1.  **Thorough Playtesting:** Play the game extensively to identify bugs and areas for improvement in gameplay and visuals.
+2.  **Debugging:** Use browser developer tools and React DevTools to diagnose and fix issues.
+3.  **Performance Optimization:** If performance becomes an issue, optimize rendering and game logic.
+4.  **Code Refactoring:** Improve code readability and maintainability through refactoring.
+5.  **Gameplay Polishing:** Fine-tune movement, collision detection, AI behavior, and overall game feel.
 
 ### IX. Further Development (Optional)
 
-**Tasks:**
-
-- More Complex Ghost AI: Implement more advanced ghost behavior, such as coordinated attacks and path prediction.
-- New Game Modes: Add new game modes or variations.
-- Multiplayer: Explore adding a multiplayer mode.
-- Power-Ups: Add more power-ups with different effects.
+- Implement more complex and varied ghost AI.
+- Add new game modes or maze variations.
+- Explore the possibility of a multiplayer mode.
+- Introduce additional power-ups with unique effects.
